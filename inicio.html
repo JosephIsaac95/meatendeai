@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Início</title>
+  <script src="/firebaseConfig.js" type="module"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sancreek&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1F1F1F;
+      background: linear-gradient(to bottom, #FFFFFF 55%, #1F1F1F 100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-[#1F1F1F] relative">
+  
+  <img src="/assets/barbearia.png" alt="Logo" class="w-[270px] h-[270px] object-contain -mt-[100px]" />
+  <h1 class="text-2xl">Bem-vindo à</h1>
+  <h1 id="titulo" class="text-4xl text-center" style="font-family: 'Sancreek', serif; font-weight: 400; font-style: normal;"></h1>
+
+  <!-- Botão fixo -->
+  <button id="botaoAgendar" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[90%] py-3 bg-[#0068EF] text-white font-semibold rounded-xl">
+    Agendar horário
+  </button>
+
+  <script type="module">
+    import { db } from "/firebaseConfig.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const url = new URL(window.location.href);
+    const partes = url.pathname.split('/'); // ["", "inicio", "barbearia-teste"]
+    const indexInicio = partes.indexOf('inicio');
+    const linkPersonalizado = indexInicio >= 0 && partes.length > indexInicio + 1
+      ? partes[indexInicio + 1]
+      : null;
+
+
+    const titulo = document.getElementById('titulo');
+    const botao = document.getElementById('botaoAgendar');
+
+    
+
+    async function carregarBarbearia() {
+      try {
+        const docRef = doc(db, 'barbearias', linkPersonalizado);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const dados = docSnap.data();
+          titulo.textContent = dados.estabelecimento;
+          botao.classList.remove('hidden');
+          botao.onclick = () => window.location.href = `/agendamento/${linkPersonalizado}`;
+
+        } else {
+          titulo.textContent = "Barbearia não encontrada!";
+        }
+      } catch (e) {
+        console.error("Erro ao buscar dados:", e);
+        titulo.textContent = "Erro ao carregar dados.";
+      }
+    }
+
+    carregarBarbearia();
+  </script>
+</body>
+</html>
